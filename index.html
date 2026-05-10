@@ -2,8 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>History of Philosophy — An Intellectual Cartography</title>
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark-theme');
+        }
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;0,800;1,500&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;1,8..60,400&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
@@ -40,6 +45,30 @@
             --font-display: 'Playfair Display', Georgia, serif;
             --font-body: 'Source Serif 4', Georgia, serif;
             --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        :root.dark-theme {
+            --parchment: #18191a;
+            --parchment-dark: #121212;
+            --parchment-warm: #202123;
+            --ink: #e4e6eb;
+            --ink-light: #b0b3b8;
+            --ink-muted: #808285;
+            --gold: #d4a373;
+            --gold-glow: rgba(212, 163, 115, 0.2);
+
+            --color-1: #2a2420;
+            --color-2: #202a20;
+            --color-3: #20282a;
+            --color-4: #2a202a;
+            --color-5: #2a2418;
+            --color-6: #252525;
+
+            --edge-default: rgba(255, 255, 255, 0.2);
+            --edge-hover: rgba(212, 163, 115, 0.8);
+
+            --shadow-soft: 0 4px 24px rgba(0, 0, 0, 0.4);
+            --shadow-hover: 0 12px 48px rgba(0, 0, 0, 0.6);
         }
 
         * {
@@ -112,8 +141,10 @@
             position: absolute;
             background: var(--parchment-warm);
             border: 1px solid rgba(107, 93, 77, 0.2);
-            border-radius: 4px;
+            border-radius: 6px;
             padding: 20px 24px;
+            box-sizing: border-box;
+            overflow-wrap: break-word;
             box-shadow: var(--shadow-soft);
             transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
             overflow: hidden;
@@ -232,7 +263,7 @@
 
         /* Period label nodes */
         .node.period {
-            background: rgba(250, 246, 240, 0.7);
+            background: var(--parchment);
             border: 2px dashed var(--ink-muted);
             text-align: center;
         }
@@ -266,6 +297,9 @@
         }
 
         #controls button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-family: var(--font-body);
             font-size: 15px;
             padding: 10px 18px;
@@ -323,8 +357,9 @@
         /* Legend */
         #legend {
             position: fixed;
-            top: 110px;
-            right: 24px;
+            bottom: 74px;
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
             padding: 18px 22px;
             background: var(--parchment-warm);
             border: 1px solid rgba(107, 93, 77, 0.2);
@@ -332,6 +367,15 @@
             box-shadow: var(--shadow-soft);
             z-index: 1000;
             font-size: 14px;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        #legend.active {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(-50%) translateY(0);
         }
 
         #legend h3 {
@@ -413,13 +457,21 @@
             top: 24px;
             right: 24px;
             z-index: 1001;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .search-wrapper {
+            position: relative;
+            width: 260px;
         }
 
         #search-input {
             font-family: var(--font-body);
             font-size: 15px;
             padding: 12px 18px;
-            width: 260px;
+            width: 100%;
             background: var(--parchment-warm);
             border: 1px solid rgba(107, 93, 77, 0.2);
             border-radius: 6px;
@@ -486,6 +538,103 @@
             color: var(--ink-light);
             font-style: italic;
         }
+
+        .pill-btn {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--parchment-warm);
+            border: 1px solid rgba(107, 93, 77, 0.2);
+            border-radius: 20px;
+            padding: 4px 6px;
+            cursor: pointer;
+            width: 60px;
+            min-width: 60px;
+            height: 32px;
+            box-shadow: var(--shadow-soft);
+            position: relative;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .pill-btn::before {
+            content: '';
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--ink);
+            left: 5px;
+            transition: transform 0.3s ease, background 0.3s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+
+        :root.dark-theme .pill-btn::before {
+            transform: translateX(26px);
+            background: #d4a373;
+        }
+
+        .pill-btn span {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+            user-select: none;
+            color: var(--ink-muted);
+            transition: color 0.3s ease;
+        }
+
+        body:not(.dark-theme) .pill-btn span:first-child {
+            color: #d4a373;
+        }
+
+        :root.dark-theme .pill-btn span:last-child {
+            color: #d4a373;
+        }
+
+        @media (max-width: 768px) {
+            #header {
+                padding: 12px 16px;
+            }
+            #header h1 {
+                font-size: 18px;
+            }
+            #header p {
+                font-size: 13px;
+                margin-top: 4px;
+            }
+            #search-container {
+                top: 64px;
+                right: 16px;
+                left: 16px;
+            }
+            .search-wrapper {
+                flex-grow: 1;
+                width: auto;
+            }
+            #minimap {
+                display: none;
+            }
+            #legend {
+                bottom: 64px;
+                width: 90%;
+                max-width: 320px;
+            }
+            #controls {
+                bottom: 16px;
+                padding: 10px 16px;
+                gap: 4px;
+                width: calc(100% - 32px);
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            #controls button {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+            .node {
+                padding: 16px !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -497,8 +646,14 @@
     </div>
 
     <div id="search-container">
-        <input type="text" id="search-input" placeholder="Search philosophers...">
-        <div id="search-results"></div>
+        <div class="search-wrapper">
+            <input type="text" id="search-input" placeholder="Search philosophers...">
+            <div id="search-results"></div>
+        </div>
+        <button id="theme-toggle" class="pill-btn" aria-label="Toggle Dark Mode" title="Toggle Dark Mode">
+            <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg></span>
+            <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></span>
+        </button>
     </div>
 
     <div id="legend">
@@ -523,10 +678,6 @@
             <div class="legend-swatch" style="background: var(--color-4)"></div>
             <span>19th-20th Century</span>
         </div>
-        <div class="legend-item">
-            <div class="legend-swatch" style="background: var(--color-6)"></div>
-            <span>Thematic Hub</span>
-        </div>
     </div>
 
     <div id="canvas-container">
@@ -542,6 +693,9 @@
     </div>
 
     <div id="controls">
+        <button id="toggle-legend" aria-label="Toggle Legend" title="Toggle Legend">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+        </button>
         <button id="zoom-out">−</button>
         <span id="zoom-display">100%</span>
         <button id="zoom-in">+</button>
@@ -563,7 +717,7 @@
                 .replace(/^- (.+)$/gm, '<li>$1</li>')
                 .replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>')
                 .replace(/^→ (.+)$/gm, '<p style="color: var(--ink-light);">→ $1</p>')
-                .replace(/---/g, '<hr>')
+                .replace(/\n*---\n*/g, '<hr>')
                 .replace(/\n\n/g, '<br><br>')
                 .replace(/\n/g, ' ');
         }
@@ -650,7 +804,7 @@
                     el.style.left = node.x + 'px';
                     el.style.top = node.y + 'px';
                     el.style.width = node.width + 'px';
-                    el.style.minHeight = node.height + 'px';
+                    // We remove minHeight logic so the card fits its content optimally.
 
                     const content = document.createElement('div');
                     content.className = 'node-content';
@@ -659,6 +813,9 @@
 
                     this.nodesLayer.appendChild(el);
                     this.nodeElements[node.id] = el;
+                    
+                    // Update node height with computed DOM height so edges connect accurately to bottom/sides
+                    node.height = el.offsetHeight;
                 });
             }
 
@@ -874,6 +1031,10 @@
                     this.fitView();
                 });
 
+                document.getElementById('toggle-legend').addEventListener('click', () => {
+                    document.getElementById('legend').classList.toggle('active');
+                });
+
                 // Touch support
                 let touchStartDist = 0;
                 let touchStartScale = 1;
@@ -922,6 +1083,13 @@
             }
 
             setupSearch() {
+                const themeToggle = document.getElementById('theme-toggle');
+                themeToggle.addEventListener('click', () => {
+                    document.documentElement.classList.toggle('dark-theme');
+                    const darkEnabled = document.documentElement.classList.contains('dark-theme');
+                    localStorage.setItem('theme', darkEnabled ? 'dark' : 'light');
+                });
+
                 const input = document.getElementById('search-input');
                 const results = document.getElementById('search-results');
 
